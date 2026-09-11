@@ -1,0 +1,68 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+    paths-ignore:
+      - 'README.md'
+      - '.gitignore'
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+      - '.gitignore'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Linux (Static musl)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Build Static Binary
+        run: |
+          docker run --rm -v "$PWD":/work -w /work alpine:latest sh -exc '
+            apk add --no-cache \
+              build-base \
+              curl \
+              git \
+              meson \
+              ninja \
+              expat-dev \
+              wayland-dev \
+              wayland-static \
+              libffi-dev
+
+            git clone --depth=1 --branch dbus-1.16.2 https://gitlab.freedesktop.org/dbus/dbus.git
+            meson setup dbus/build dbus --prefix=/usr --buildtype=release --default-library=static -Dtools=false -Dmodular_tests=disabled
+            meson compile -C dbus/build
+            meson install -C dbus/build
+            rm -rf dbus
+
+            curl -sSL https://github.com/c3lang/c3c/releases/latest/download/c3-linux-static.tar.gz | tar -xz -C /opt
+            ln -s /opt/c3/c3c /usr/local/bin/c3c
+
+            c3c build static
+          '
+          mkdir -p dist
+          tar -czvf dist/wl-gamma-linux-x86_64.tar.gz -C build wl-gamma
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: wl-gamma-linux-x86_64
+          path: dist/wl-gamma-linux-x86_64.tar.gz
+
+      - name: Publish Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: dist/wl-gamma-linux-x86_64.tar.gz
+          generate_release_notes: true

@@ -1,0 +1,25 @@
+{
+	"authors": [ "Manuel Barrio Linares <mbarriolinares@gmail.com>" ],
+	"version": "0.1.0",
+	"test-sources": [ "test/**" ],
+	"build-dir": "build",
+	"output": "build",
+	"sources": [ "src/**" ],
+	"targets": {
+		"wl-gamma": {
+			"type": "executable",
+			"linked-libraries": [ "wayland-client", "dbus-1", "rt" ],
+			"opt": "O3",
+			"debug-info": "none",
+			"link-args": [ "-s" ]
+		},
+		"static": {
+			"type": "executable",
+			"name": "wl-gamma",
+			"linked-libraries": [ "wayland-client", "dbus-1", "ffi", "m" ],
+			"opt": "O3",
+			"debug-info": "none",
+			"link-args": [ "-static", "-s" ]
+		}
+	}
+}
