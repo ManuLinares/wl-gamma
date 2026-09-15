@@ -188,17 +188,9 @@ fn bool Color.update_brightness(Color* self, double delta)
 
 fn ushort[<3>] map_rgb(double v, Vec3d white, Color color, double v_max_gamma)
 {
-	if (v <= 0.0)
-	{
-		return {};
-	}
+	if (v <= 0.0) return {};
 
-	Vec3d vw = v * white;
-	Vec3d intensity = {
-		math::pow(vw.x, color.gamma) * v_max_gamma,
-		math::pow(vw.y, color.gamma) * v_max_gamma,
-		math::pow(vw.z, color.gamma) * v_max_gamma
-	};
+	Vec3d intensity = (v * white).pow(color.gamma) * v_max_gamma;
 	Vec3d clamped = intensity.clamp((Vec3d)0.0, (Vec3d)ushort::max);
 
 	return (ushort[<3>])clamped;

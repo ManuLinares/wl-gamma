@@ -46,7 +46,7 @@ jobs:
             meson install -C dbus/build
             rm -rf dbus
 
-            curl -sSL https://github.com/c3lang/c3c/releases/latest/download/c3-linux-static.tar.gz | tar -xz -C /opt
+            curl -sSL https://github.com/c3lang/c3c/releases/download/latest-prerelease-tag/c3-linux-static.tar.gz | tar -xz -C /opt
             ln -s /opt/c3/c3c /usr/local/bin/c3c
 
             c3c build static
